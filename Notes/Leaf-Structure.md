@@ -10,10 +10,14 @@ A Leaf is a strucutre that contains:
 * Count 
     * Used to count the amount of charatcers the value will be
 ```
-strcut s_leaf {
+struct s_leaf {
     struct s_tree *left;
     char key[255];
     char *value;
     int count;
 } Tag tag;
 ```
+
+\* We are using a "tag" to differentiate between a node and leaf
+* 1 = node
+* 2 = leaf

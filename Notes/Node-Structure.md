@@ -12,3 +12,7 @@ struct s_node{
 // When a user connects to the TCP port, the database should create a path and link a structure to the path 
 char path[255];
 ```
+
+\* We are using a "tag" to differentiate between a node and leaf
+* 1 = node
+* 2 = leaf
