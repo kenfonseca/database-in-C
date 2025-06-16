@@ -1,0 +1,15 @@
+The goal is to create a very fast database
+
+In-Memory Databases are not saved to disk
+* Restarting the database will clear all data
+* RAM memory
+* Why use this?
+    * It's helpful for caching DB data so we don't need to retrieve data directly from the DB and can read quickly from "temporary atorage"
+        * Multiple reads are costly in wbe develeopment
+    * It's helpful for session IDs. Everytime a user uses a web browser to connect to a server, they are assigned a session ID as a cookie
+        * This info is temporary and must be pulled quickly which is why saving it in a cache makes more sense
+
+The most used in-memory database is "Redis"
+* They claim to be the fastest
+* We will attempt to make it faster
+* And free
