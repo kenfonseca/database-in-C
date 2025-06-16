@@ -1,6 +1,7 @@
 /* tree.c */
 #include "tree.h"
 
+// The root "node" or the beginning node for the base of the tree
 Tree root = { 
     // We want the type to be a node for root
     .n = {
@@ -29,6 +30,13 @@ struct s_node {
 };
 */
 
+// Intiialize a memmory block to zero
+/* Why?
+    Clear the buffer of the pointer
+    Avoid garbage/unitialized data
+    Prepare memory for fresh use
+*/
+// Same effect as "memset(str, 0, size)"
 void zero(int8 *str, int16 size){
     int8 *p;
     int16 n;
@@ -40,6 +48,7 @@ void zero(int8 *str, int16 size){
     return;
 }
 
+// Function to create a node (or root) and assign a parent to it
 Node *create_node(Node *parent, int8 *path){
     // The node to be created
     Node *n;
@@ -93,6 +102,7 @@ Leaf *find_last_linear(Node *parent){
     return l;
 }
 
+// Function to create a leaf and assign a parent to it
 Leaf *create_leaf(Node *parent, int8 *key, int8 *value, int16 count){ 
     /*
         l = last leaf connected to the parent
