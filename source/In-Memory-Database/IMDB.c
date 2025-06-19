@@ -8,7 +8,6 @@
 bool server_continuation;
 bool child_continuation;
 
-
 // Combo of assert and print error functions
 // had to make a custom assert_perror() because compiler won't recognize it
 void assert_perror(int err){
@@ -36,13 +35,15 @@ void zero(int8 *str, int16 size){
     return;
 }
 
+// Loop for child processes (forked from mainLoop()) that handles client connections 
 void childLoop(Client *cli){
     sleep(1);
 
     return; 
 }
 
-void mainloop(int s){
+// Loop to set up the connections between server and client
+void mainLoop(int s){
     struct sockaddr_in cli;
     int s2; // client side's file descriptor 
     int32 len; // Will be used to hold the length of the address that is returned by accept()
@@ -85,7 +86,7 @@ void mainloop(int s){
 
         return;
     } else { // fork() returns 0 is the process is a child
-        dprintf(s2, "100 Connected to IMDB Server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
+        dprintf(s2, "[100] - Connected to IMDB Server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
         // Continue connection
         child_continuation = true;
         while (child_continuation){
@@ -180,10 +181,10 @@ int main(int argc, char *argv[]){
     // Assign the server to the socket descriptor
     s = initServer(port);
 
-    // While this is true, it will keep running mainloop
+    // While this is true, it will keep running mainLoop
     server_continuation = true;
     while(server_continuation){
-        mainloop(s);
+        mainLoop(s);
     }
     printf("Shutting down IMDB server");
     // Shut off connections

@@ -39,7 +39,7 @@ typedef struct s_client Client;
 
 void assert_perror(int);
 void zero(int8*,int16);
-void mainloop(int);
+void mainLoop(int);
 void childLoop(Client*);
 int initServer(int16);
 int main(int, char**);
