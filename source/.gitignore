@@ -1,5 +1,9 @@
-# Executable
+# Executables
 IMDB
+server
+tree
 
-# Binary
+# Binaries
 IMDB.o
+server.o
+tree.o

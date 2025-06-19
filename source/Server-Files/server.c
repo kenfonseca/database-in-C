@@ -1,9 +1,9 @@
-/* IMDB.c */
+/* server.c */
 /*
     This focus is on the server software and network communication
     so that we can log into and interact with the DB server
 */
-#include "IMDB.h"
+#include "server.h"
 
 bool server_continuation;
 bool child_continuation;
@@ -65,7 +65,7 @@ void mainLoop(int s){
     // Return the address
     ip = inet_ntoa(cli.sin_addr);
 
-    printf("Connetion from %s:%d\n", ip, port);
+    printf("Connection from %s:%d\n", ip, port);
 
     // Allocate memory for a Client struct
     client = (Client *)malloc(sizeof(struct s_client));
@@ -86,7 +86,7 @@ void mainLoop(int s){
 
         return;
     } else { // fork() returns 0 is the process is a child
-        dprintf(s2, "[100] - Connected to IMDB Server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
+        dprintf(s2, "[100] - Connected to server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
         // Continue connection
         child_continuation = true;
         while (child_continuation){
@@ -156,7 +156,7 @@ int initServer(int16 port){
         // On success, listen() returns 0
         assert_perror(errno);
     } 
-    printf("IMDB Server listening on %s:%d\n", HOST, port);
+    printf("Server listening on %s:%d\n", HOST, port);
 
     return s;
 }
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]){
     while(server_continuation){
         mainLoop(s);
     }
-    printf("Shutting down IMDB server");
+    printf("Shutting down server");
     // Shut off connections
     close(s);
 
