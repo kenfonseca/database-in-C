@@ -1,12 +1,50 @@
-/* IMDB.c */
+/* server.c */
 /*
     This focus is on the server software and network communication
     so that we can log into and interact with the DB server
 */
-#include "IMDB.h"
+
+// if memory acts weird, try changing the use of the 'sizeof()' function to the actual number for the buffer size 
+#include "server.h"
 
 bool server_continuation;
 bool child_continuation;
+
+
+int32 handle_hello(Client *client, int8 *folder, int8 *args){
+    if(*args){
+
+    }
+    dprintf(client->s, "hello back '%s\n", folder);
+
+    return 0;
+}
+
+CmdHandler handlers[] = {
+    {(int8 *)"hello" , handle_hello},
+    {(int8 *)"no" , handle_hello},
+};
+
+Callback getcmd(int8 *cmd){
+    Callback cb;
+    int16 n, arrLen;
+
+    arrLen = sizeof(handlers)/16;
+
+    if(sizeof(handlers)<16){
+        return 0;
+    }
+
+    cb = 0;
+    for(n=0; n<arrLen; n++){
+        if(!strcmp((char *) cmd, (char *)handlers[n].cmd)){
+            cb = handlers[n].handler;
+            break;
+        }
+    }
+
+    return cb;
+}
 
 // Combo of assert and print error functions
 // had to make a custom assert_perror() because compiler won't recognize it
@@ -36,8 +74,114 @@ void zero(int8 *str, int16 size){
 }
 
 // Loop for child processes (forked from mainLoop()) that handles client connections 
-void childLoop(Client *cli){
-    sleep(1);
+void childLoop(Client *client){
+    // Buffer to read from the client socket's file descriptor
+    int8 buf[256];
+    // Counter variable
+    int16 n;
+    // Char arrrays to hold the client's commands and arguments
+    int8 cmd[256], folder[256], args[256];
+    // Prepare buffers
+    zero(cmd, sizeof(cmd));
+    zero(folder, sizeof(folder));
+    zero(args, sizeof(args));
+    // Char pointer to point to the command section of client input
+    int8 *p;
+    // Char pointer to point to the folder section of client input
+    int8 *f;
+
+    // prepare the buffer
+    zero(buf, sizeof(buf));
+    // read the contents of the client's file descriptor into the buffer
+    read(client->s, (char *)buf, sizeof(buf)-1);
+    // Set the number of characters in the buffer to the counter
+    n = (int16)strlen((char *)buf);
+    // Backup
+    if(n>254){
+        n=254;
+    }
+
+    /*
+        User input (buf) will be in the format:   
+        'command folder argument'
+    */ 
+
+    // HANDLE 'command' INPUT
+    /* While logic - continue if:
+        'p' is positive
+        'n' is positive
+        'p' is not a space (delimitter)
+        'p' is not a newline
+        'p' is not a carriage return character
+    */
+    for(p=buf; 
+            (*p) 
+            && (n--)
+            && (*p != ' ')
+            && (*p != '\n')
+            && (*p != '\r');
+        p++){
+    };
+
+    // If 'p' or 'n' are not positive, 
+    if(!(*p) || (!n)){
+        // Copy over the user's command and finish
+        strncpy((char *)cmd, (char *)buf, 255);
+        goto done;
+    }
+    // Else if there is a delimitter
+    else if(*p == ' '){
+        *p = 0;
+        strncpy((char *)cmd, (char *)buf, 255);
+    }
+    // Else if there is a new line or carriage return character
+    else if((*p == '\n') || (*p == '\r')){
+        *p = 0;
+        // Copy over the command
+        strncpy((char *)cmd, (char *)buf, 255);
+        goto done;
+    } 
+
+    // HANDLE 'folder' INPUT
+    for(p++, f=p; // Add one to get past the space or endline after the 'command', then 'f' points to the folder
+            (*p) 
+            && (n--)
+            && (*p != ' ')
+            && (*p != '\n')
+            && (*p != '\r');
+        p++){
+    };
+
+    // If 'p' is equal to zero, 
+    if(!(*p) || (!n)){
+        // Copy over the user's folder 
+        strncpy((char *)folder, (char *)f, 255);
+        goto done;
+    }
+    else if((*p == ' ') || (*p == '\n') || (*p == '\r')){
+        *p = 0;
+        // Copy over the folder
+        strncpy((char *)folder, (char *)f, 255);
+    } 
+
+    // HANDLE 'argument' INPUT
+    p++;
+    if (*p) { // Only continue if 'p' is positive
+        strncpy((char *)args, (char *)p, 255);
+        for (p=args; 
+                ((*p) && 
+                (*p != '\n') && 
+                (*p != '\r')); 
+            p++){
+        } 
+        *p = 0;
+    }
+   
+    // Print the parsed input
+    done:
+        dprintf(client->s, "cmd:\t%s\n", cmd);
+        dprintf(client->s, "folder:\t%s\n", folder);
+        dprintf(client->s, "args:\t%s\n", args);
 
     return; 
 }
@@ -86,12 +230,14 @@ void mainLoop(int s){
 
         return;
     } else { // fork() returns 0 is the process is a child
-        dprintf(s2, "[100] - Connected to IMDB server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
+        dprintf(s2, "[100] - Connected to server\n"); //Like regular printf but sends to a file descriptor (open file, socket, etc.)
         // Continue connection
         child_continuation = true;
+        // Keep reading commands from the user while the connection is active
         while (child_continuation){
             childLoop(client);
         }
+        // Clean-up
         close(s2);
         free(client);
 
@@ -156,7 +302,7 @@ int initServer(int16 port){
         // On success, listen() returns 0
         assert_perror(errno);
     } 
-    printf("IMDB server listening on %s:%d\n", HOST, port);
+    printf("Server listening on %s:%d\n", HOST, port);
 
     return s;
 }
@@ -166,6 +312,14 @@ int main(int argc, char *argv[]){
     int16 port;
     // Socket descriptor to accept connections
     int s;
+
+    Callback x;
+    x = getcmd((int8 *)"hello");
+    printf("%p\n", x);
+
+    x = getcmd((int8 *)"no");
+    printf("%p\n", x);
+    return 0;
 
     // If there are less than 2 arguments, a port has not been specified by user
     if(argc < 2){
@@ -186,7 +340,7 @@ int main(int argc, char *argv[]){
     while(server_continuation){
         mainLoop(s);
     }
-    printf("Shutting down IMDB server");
+    printf("Shutting down server");
     // Shut off connections
     close(s);
 

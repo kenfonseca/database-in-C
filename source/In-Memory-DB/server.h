@@ -1,7 +1,7 @@
-/* IMDB.h */
+/* server.h */
 
-#ifndef IMDB
-#define IMDB
+#ifndef SERVER
+#define server
 
 #define _GNU_SOURCE
 
@@ -36,6 +36,15 @@ struct s_client {
     int16 port; // Port number
 };
 typedef struct s_client Client;
+
+typedef int32 (*Callback)(Client*,int8*,int8*);
+
+// Struture that acts as the command handler for client input
+struct s_cmdHandler {
+    int8 *cmd;
+    Callback handler;
+};
+typedef struct s_cmdHandler CmdHandler;
 
 void assert_perror(int);
 void zero(int8*,int16);

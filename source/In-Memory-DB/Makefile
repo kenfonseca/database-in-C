@@ -4,26 +4,32 @@
 # 	c2x - version 23 for c
 flags=-O2 -Wall -std=c2x
 
-all: clean IMDB
+all: clean tree server
 
-# IMDB executable w/ IMDB.o as a dependency
+tree: tree.o
+	cc ${flags} $^ -o $@ ${ldflags}
+
+tree.o: tree.c
+	cc ${flags} -c $^
+
+# server executable w/ server.o as a dependency
 # cc - compiler
 # ${flags} - allow flags
 # $^ - source file
 # -o - the binary flag(?)
 # $@ - the target
 # ${ldflags} - helps with linkage
-IMDB: IMDB.o
+server: server.o
 	cc ${flags} $^ -o $@ ${ldflags}
 
-# Create the IMDB.o binary w/ the dependency IMDB.c
+# Create the server.o binary w/ the dependency server.c
 # cc - compiler
 # ${flags} - allow flags
 # -c - compile to a binary file
 # $^ - specify the sourcefile  
-IMDB.0: IMDB.c
-	cc: ${flags} -c $^
+server.0: server.c
+	cc ${flags} -c $^
 
-# Remove any binary files and executables (IMDB.o and IMDB)
+# Remove any binary files and executables (server.o and server)
 clean:
-	rm -f *.o IMDB
+	rm -f *.o tree server
