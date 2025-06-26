@@ -26,6 +26,15 @@ Nullptr myNullPtr = 0;
     errno = (x); \
     return myNullPtr
 
+// Takes in a string to copy to a buffer 
+#define Print(x) \
+    zero(buf, 256); \
+    strncpy((char *)buf, (char *)(x), 255); \
+    size = (int16)strlen((char *)buf); \
+    if(size) \
+        write(fd, (char *)buf, size); 
+    
+
 typedef unsigned int int32;
 typedef unsigned short int int16;
 typedef unsigned char int8;
@@ -67,3 +76,12 @@ union u_tree {
     Leaf l;
 };
 typedef union u_tree Tree;
+
+int8 *indent(int8);
+void print_tree(int, Tree*);
+void zero(int8*, int16);
+Node *create_node(Node*,int8*);
+Leaf *find_last_linear(Node*);
+Leaf *create_leaf(Node*,int8*,int8*,int16);
+
+int main(void);
