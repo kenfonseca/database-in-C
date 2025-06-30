@@ -146,8 +146,53 @@ Node *create_node(Node *parent, int8 *path)
     return n;
 }
 
+// Find the node we're using from the path
+Node *find_node_linear(int8 *path){
+    Node *n, *ret;
+    // If the desired path is the given node return it
+    for(ret = (Node *)0, n = (Node *)&root; n; n = n->west){
+        if(!strcmp((char *)n->path, (char *)path)){
+            ret = n;
+            break;
+        }
+    }   
 
-// Returns the last leaf
+    return ret;
+}
+
+// Searching for leaves of a node using a path, key, and starting point
+Leaf *find_leaf_linear(int8 *path, int8 *key){
+    Node *n;
+    n = find_node_linear(path);
+    Leaf *l, *ret;
+    ret = (Leaf *)0;
+     // Make sure the start node is valid
+    if(!(n)){
+        return ret; 
+    }
+
+    // Find the leaf with the key and return it
+    for(l = n->east; l; l = l->east){
+        if(!strcmp((char *)l->key, (char *)key)){
+            ret = l;
+            break;
+        }
+    }
+
+    return ret; 
+}
+
+int8 *lookup_linear(int8 *path, int8 *key){
+    Leaf *p;
+
+    p = find_leaf_linear(path, key);
+    
+    return (p) ?
+        p->value :
+    (int8 *)0;
+}
+
+// Returns the last leaf of a node
 Leaf *find_last_linear(Node *parent)
 {
     // Leaf to be returned when found
@@ -165,8 +210,7 @@ Leaf *find_last_linear(Node *parent)
         As long as 'l' has an east, keep going (parent has another leaf)
         Each iteration, set 'l' to l's east
     */
-    for (l = parent->east; l->east; l = l->east)
-        ;
+    for (l = parent->east; l->east; l = l->east);
     // Ensure that l is not 0
     assert(l);
 
@@ -236,7 +280,7 @@ Leaf *create_leaf(Node *parent, int8 *key, int8 *value, int16 count)
 }
 
 int main(){
-    Node *n1, *n2, *n3;
+    Node *n1, *n2;
     Leaf *l1, *l2, *l3;
     int8 *keyl1, *keyl2, *keyl3, *valuel1, *valuel2, *valuel3;
     int16 sizel1, sizel2, sizel3;
@@ -267,16 +311,18 @@ int main(){
     int fd = 1;
     print_tree(fd, &root);
 
-    n3 = create_node(n1, (int8 *)"/Users/help");
-    assert(n3);
-
-    print_tree(fd, &root);
-
-
+    // Node *found = find_node_linear(n1->path);
+    // printf("%s\n", found->path);
+    int8 *find = lookup_linear(n1->path, l1->key);
+    if(find){
+        printf("%s\n", find);
+    } else {
+        printf("no\n");
+    }
+   
     // printf("%p %p\n", n1, n2);
     free(n2);
     free(n1);
-    free(n3);
     free(l1);
     free(l2);
     free(l3);

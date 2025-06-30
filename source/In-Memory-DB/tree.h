@@ -22,6 +22,9 @@ typedef void* Nullptr;
 Nullptr myNullPtr = 0;
 
 #define find_last(x)    find_last_linear(x)
+#define find_leaf(x, y)    find_leaf_linear(x, y)
+#define lookup(x, y)    lookup_linear(x, y)
+#define find_node(x)    find_node_linear(x);
 #define reterr(x) \
     errno = (x); \
     return myNullPtr
@@ -80,6 +83,9 @@ typedef union u_tree Tree;
 int8 *indent(int8);
 void print_tree(int, Tree*);
 void zero(int8*, int16);
+Leaf *find_leaf_linear(int8*, int8*);
+int8 *lookup_linear(int8*, int8*);
+Node *find_node_linear(int8*);
 Node *create_node(Node*,int8*);
 Leaf *find_last_linear(Node*);
 Leaf *create_leaf(Node*,int8*,int8*,int16);
