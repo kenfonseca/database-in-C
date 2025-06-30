@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 
 // Used for the Tag variable to assign the value type
 #define TagRoot     1 /* 00 01 */
@@ -15,6 +16,7 @@
 #define TagLeaf     4 /* 01 00 */
 
 #define NoError     0
+#define ExampleFile     "./wl.txt"
 
 // Custom void pointer variable
 typedef void* Nullptr;
@@ -89,5 +91,9 @@ Node *find_node_linear(int8*);
 Node *create_node(Node*,int8*);
 Leaf *find_last_linear(Node*);
 Leaf *create_leaf(Node*,int8*,int8*,int16);
+ int8 *example_path(int8);
+ int32 example_leaves(void);
+ Tree *example_tree(void);
+ int8 *example_duplicate(int8*);
 
 int main(void);

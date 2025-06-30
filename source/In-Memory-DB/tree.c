@@ -279,53 +279,123 @@ Leaf *create_leaf(Node *parent, int8 *key, int8 *value, int16 count)
     return new;
 }
 
-int main(){
-    Node *n1, *n2;
-    Leaf *l1, *l2, *l3;
-    int8 *keyl1, *keyl2, *keyl3, *valuel1, *valuel2, *valuel3;
-    int16 sizel1, sizel2, sizel3;
+/* 
+Structure of root and folders:
 
-    n1 = create_node((Node *)&root, (int8 *)"/Users");
-    assert(n1);
-    n2 = create_node(n1, (int8 *)"/Users/login");
-    assert(n2);
+/
+ /a
+  /a/b
+    /a/b/c
 
-    keyl1 = (int8 *)"kenneth";
-    valuel1 = (int8 *)"xyz93323aa";
-    sizel1 = (int16)strlen((char *)valuel1);
-    l1 = create_leaf(n2, keyl1, valuel1, sizel1);
-    assert(l1);
+*/
+Tree *example_tree(){
+    int8 c;
+    Node *n, *p;
+    int8 path[256];
+    int32 x;
 
-    keyl2 = (int8 *)"kim";
-    valuel2 = (int8 *)"kajana91881MM";
-    sizel2 = (int16)strlen((char *)valuel2);
-    l2 = create_leaf(n2, keyl2, valuel2, sizel2);
-    assert(l2);
+    zero(path, 256);
+    x = 0;
 
-    keyl3 = (int8 *)"scarlet";
-    valuel3 = (int8 *)"kasdcis118281";
-    sizel3 = (int16)strlen((char *)valuel3);
-    l3 = create_leaf(n2, keyl3, valuel3, sizel3);
-    assert(l3);
+    for(n = (Node *)&root, c='a'; c<='z'; c++){
+        x = (int32)strlen((char *)path);
+        *(path + x++) = '/';
+        *(path + x) = c;
 
-    int fd = 1;
-    print_tree(fd, &root);
-
-    // Node *found = find_node_linear(n1->path);
-    // printf("%s\n", found->path);
-    int8 *find = lookup_linear(n1->path, l1->key);
-    if(find){
-        printf("%s\n", find);
-    } else {
-        printf("no\n");
+        p = n;
+        n = create_node(p, path);
     }
-   
-    // printf("%p %p\n", n1, n2);
-    free(n2);
-    free(n1);
-    free(l1);
-    free(l2);
-    free(l3);
+
+    return (Tree *)&root;
+}
+
+int8 *example_path(int8 path){
+    int32 x;
+    static int8 buf[256];
+    int8 c;
+    
+    zero(buf, 256);
+    for(c='a'; c<=path; c++){
+        x = (int32)strlen((char *)buf);
+        *(buf + x++) = '/';
+        *(buf + x) = c;
+    }
+
+    return buf;
+}
+
+int8 *example_duplicate(int8 *str){
+    int16 n, x;
+    static int8 buf[256];
+
+    zero(buf, 256);
+    strncpy((char *)buf, (char *)str, 255);
+    n = (int16)strlen((char *)buf);
+    x = (n*2);
+    if(x > 254){
+        return buf;
+    } else {
+        strncpy((char *)buf+n, strdup((char *)buf), 255);
+    }
+
+    return buf;
+}
+
+int32 example_leaves(){
+    // int fd;
+    FILE *fd;
+    int32 x, y;
+    int8 buf[256];
+    int8 *path, *val;
+    Node *n;
+    
+    // fd = open(ExampleFile, O_RDONLY);
+    fd = fopen(ExampleFile, "r");
+    assert(fd);
+
+    zero(buf, 256);
+    y = 0;
+
+    while(fgets((char *)buf, 255, fd)){
+        x = (int32)strlen((char *)buf);
+        *(buf+x-1) = 0;
+        path = example_path(*buf);
+        n = find_node(path);
+
+        if(!n){
+            zero(buf, 256);
+            continue;
+        }
+
+        val = example_duplicate(buf);
+
+        // printf("\n");
+        // printf("node = '%s'\n", n->path);
+        // printf("buf = '%s'\n", buf);
+        // printf("value = '%s'\n", val);
+        // printf("length = '%d'\n", (int16)strlen((char *)val));
+        // printf("\n");
+
+        create_leaf(n, buf, val, (int16)strlen((char *)val));
+
+        y++;
+        zero(buf, 255);
+    }
+    fclose(fd);
+
+    return y;
+}
+
+int main(){
+    Tree *example;
+    int32 x;
+
+    example = example_tree();
+    fflush(stdout);
+    x = example_leaves();
+    (void)x;
+
+    print_tree(1, example);
 
     return 0;
 }
